@@ -10,6 +10,7 @@ class PdfJsConfiguration {
     this.useSystemFonts = true,
     this.standardFontDataUrl,
     this.pdfJsDownloadTimeout = const Duration(seconds: 10),
+    this.useLocalJsSrc = false,
   });
 
   /// `psf.js` file URL such as https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.min.mjs
@@ -33,6 +34,9 @@ class PdfJsConfiguration {
 
   /// The timeout for downloading the PDF.js library. The default is 10 seconds.
   final Duration pdfJsDownloadTimeout;
+
+  /// Whether to use the local `pdf.js` and `pdf.worker.js` files instead of downloading them.
+  final bool useLocalJsSrc;
 
   /// The current configuration. null to use the default.
   ///

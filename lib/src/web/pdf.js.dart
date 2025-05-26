@@ -6,6 +6,7 @@ library pdf.js;
 import 'dart:js_interop';
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart';
 import 'package:synchronized/extension.dart';
 import 'package:web/web.dart' as web;
 
@@ -331,18 +332,34 @@ Future<void> ensurePdfjsInitialized() async {
     }
 
     final pdfJsSrc = PdfJsConfiguration.configuration?.pdfJsSrc ?? _pdfjsUrl;
+    final useLocalJsSrc =
+        PdfJsConfiguration.configuration?.useLocalJsSrc ?? false;
+
     try {
-      final script =
-          web.document.createElement('script') as web.HTMLScriptElement
-            ..type = 'text/javascript'
-            ..charset = 'utf-8'
-            ..async = true
-            ..type = 'module'
-            ..src = pdfJsSrc;
-      web.document.querySelector('head')!.appendChild(script);
-      await script.onLoad.first.timeout(
-          PdfJsConfiguration.configuration?.pdfJsDownloadTimeout ??
-              const Duration(seconds: 10));
+      if (useLocalJsSrc) {
+        final jsContent = await rootBundle.loadString(pdfJsSrc);
+
+        final script =
+            web.document.createElement('script') as web.HTMLScriptElement
+              ..async = true
+              ..crossOrigin = 'anonymous'
+              ..type = 'text/javascript'
+              ..text = jsContent;
+
+        web.document.querySelector('head')!.appendChild(script);
+      } else {
+        final script =
+            web.document.createElement('script') as web.HTMLScriptElement
+              ..type = 'text/javascript'
+              ..charset = 'utf-8'
+              ..async = true
+              ..type = 'module'
+              ..src = pdfJsSrc;
+        web.document.querySelector('head')!.appendChild(script);
+        await script.onLoad.first.timeout(
+            PdfJsConfiguration.configuration?.pdfJsDownloadTimeout ??
+                const Duration(seconds: 10));
+      }
     } catch (e) {
       throw StateError('Failed to load pdf.js from $pdfJsSrc: $e');
     }
