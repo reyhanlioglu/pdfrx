@@ -341,9 +341,11 @@ Future<void> ensurePdfjsInitialized() async {
 
         final script =
             web.document.createElement('script') as web.HTMLScriptElement
-              ..async = true
-              ..crossOrigin = 'anonymous'
               ..type = 'text/javascript'
+              ..charset = 'utf-8'
+              ..async = true
+              ..defer = false
+              ..type = 'module'
               ..text = jsContent;
 
         web.document.querySelector('head')!.appendChild(script);
@@ -357,8 +359,9 @@ Future<void> ensurePdfjsInitialized() async {
               ..src = pdfJsSrc;
         web.document.querySelector('head')!.appendChild(script);
         await script.onLoad.first.timeout(
-            PdfJsConfiguration.configuration?.pdfJsDownloadTimeout ??
-                const Duration(seconds: 10));
+          PdfJsConfiguration.configuration?.pdfJsDownloadTimeout ??
+              const Duration(seconds: 10),
+        );
       }
     } catch (e) {
       throw StateError('Failed to load pdf.js from $pdfJsSrc: $e');
